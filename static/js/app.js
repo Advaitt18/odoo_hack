@@ -780,7 +780,8 @@
       </div>
       ${subActions(s) ? `<div class="drawer-actions">${subActions(s)}</div>` : ""}`, reload);
 
-    $$("[data-inv]", d).forEach((r) => (r.onclick = () => openInvoice(r.dataset.inv, reload)));
+    // Refresh only the page behind, so the invoice stays open after an action on it.
+    $$("[data-inv]", d).forEach((r) => (r.onclick = () => openInvoice(r.dataset.inv, after)));
     $$("[data-act]", d).forEach((b) => (b.onclick = async () => {
       const act = b.dataset.act;
       if (act === "edit") return subscriptionForm(s, after);

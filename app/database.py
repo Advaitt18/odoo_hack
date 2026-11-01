@@ -6,10 +6,16 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# The database file always lives in the project folder, no matter where the
-# server is started from. Set DATABASE_URL to use a different database.
-DEFAULT_DB = "sqlite:///" + os.path.join(PROJECT_ROOT, "intrinsic.db").replace("\\", "/")
+# The database file lives in the project folder, no matter where the server is
+# started from. Serverless hosts such as Vercel only allow writing to /tmp, so
+# there it goes to /tmp instead (and is rebuilt with demo data on each cold start).
+# Set DATABASE_URL to use a different database, e.g. a hosted PostgreSQL.
+ON_SERVERLESS = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+DB_FOLDER = "/tmp" if ON_SERVERLESS else PROJECT_ROOT
+DEFAULT_DB = "sqlite:///" + os.path.join(DB_FOLDER, "intrinsic.db").replace("\\", "/")
 DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DB)
+if DATABASE_URL.startswith("postgres://"):  # hosted Postgres providers often use this older prefix
+    DATABASE_URL = "postgresql://" + DATABASE_URL[len("postgres://"):]
 
 engine = create_engine(
     DATABASE_URL,

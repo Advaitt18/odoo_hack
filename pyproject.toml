@@ -1,0 +1,15 @@
+[project]
+name = "intrinsic"
+version = "1.0.0"
+description = "Subscription & Invoicing Management System"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "sqlalchemy>=2.0",
+    "pydantic>=2.6",
+]
+
+# Tells Vercel where the FastAPI app is (the `app` object in app/main.py).
+[tool.vercel]
+entrypoint = "app.main:app"

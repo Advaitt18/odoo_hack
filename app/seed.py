@@ -1,5 +1,8 @@
 """Demo data for Brightloop Software, created the first time the app starts.
 
+All people, companies, emails and phone numbers are made up. Customer emails use the
+reserved .example domain and phone numbers are placeholders, so none belong to anyone real.
+
 Every demo account uses the password  Intrinsic@2026
 """
 from datetime import date, timedelta
@@ -31,14 +34,14 @@ def seed(db: Session, today: date | None = None) -> bool:
     db.add_all([admin, staff, User(name="Meera Pillai", email="meera@intrinsic.io", password_hash=pw, role="staff",
                                    department="Billing Operations")])
     customers_spec = [
-        ("Arjun Nair", "customer@intrinsic.io", "Nimbus Retail Pvt Ltd", "+91 98470 11223", "MG Road, Kochi, Kerala"),
-        ("Priya Sharma", "priya@acmetraders.in", "Acme Traders", "+91 99950 44556", "Technopark, Trivandrum, Kerala"),
-        ("David Thomas", "david@globexindia.com", "Globex India Ltd", "+91 80 4123 7788", "Whitefield, Bengaluru"),
-        ("Fatima Khan", "fatima@heliostudio.in", "Helio Studio", "+91 97445 66778", "Kakkanad, Kochi, Kerala"),
-        ("Vikram Iyer", "vikram@initech.co.in", "Initech Solutions", "+91 44 2811 9900", "OMR, Chennai"),
-        ("Sneha Kulkarni", "sneha@bluepeak.in", "Bluepeak Foods", "+91 20 6610 2233", "Baner, Pune"),
-        ("Rohan Das", "rohan@kaveriprints.in", "Kaveri Prints", "+91 33 4002 1188", "Salt Lake, Kolkata"),
-        ("Lakshmi Menon", "lakshmi@greenleaf.in", "Greenleaf Organics", "+91 484 270 3344", "Edappally, Kochi"),
+        ("Arjun Nair", "customer@intrinsic.io", "Nimbus Retail Pvt Ltd", "+91 00000 10001", "MG Road, Kochi, Kerala"),
+        ("Priya Sharma", "priya@acmetraders.example", "Acme Traders", "+91 00000 10002", "Technopark, Trivandrum, Kerala"),
+        ("David Thomas", "david@globexindia.example", "Globex India Ltd", "+91 00000 10003", "Whitefield, Bengaluru"),
+        ("Fatima Khan", "fatima@heliostudio.example", "Helio Studio", "+91 00000 10004", "Kakkanad, Kochi, Kerala"),
+        ("Vikram Iyer", "vikram@initech.example", "Initech Solutions", "+91 00000 10005", "OMR, Chennai"),
+        ("Sneha Kulkarni", "sneha@bluepeak.example", "Bluepeak Foods", "+91 00000 10006", "Baner, Pune"),
+        ("Rohan Das", "rohan@kaveriprints.example", "Kaveri Prints", "+91 00000 10007", "Salt Lake, Kolkata"),
+        ("Lakshmi Menon", "lakshmi@greenleaf.example", "Greenleaf Organics", "+91 00000 10008", "Edappally, Kochi"),
     ]
     customers = [User(name=n, email=e, password_hash=pw, role="customer", company=c, phone=p, address=a)
                  for n, e, c, p, a in customers_spec]

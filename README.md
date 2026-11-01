@@ -182,6 +182,16 @@ All settings are optional environment variables.
 
 ---
 
+## Deploying online (Vercel)
+
+The project is ready for Vercel: `pyproject.toml` points Vercel to the app (`app.main:app`) and `.python-version` sets Python 3.12. In Vercel, choose **Add New → Project**, import this repository, leave every setting at its default and deploy.
+
+Vercel only lets apps write to `/tmp`, so there the SQLite database lives in `/tmp` and is rebuilt with demo data whenever Vercel starts a fresh copy of the app. That is fine for a demo, but changes you make are not kept for long. For lasting data, set `DATABASE_URL` to a hosted PostgreSQL database and add `psycopg[binary]` to `requirements.txt`.
+
+All demo people, companies, emails and phone numbers are made up. Anyone with the demo passwords can sign in to a public deployment, so treat it as a demo, not a place for real data.
+
+---
+
 ## Screenshots
 
 | Sign in | Subscription with its lifecycle |

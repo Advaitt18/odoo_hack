@@ -30,14 +30,14 @@ def test_password_rules(client):
     cases = {"Short1!": "more than 8", "nouppercase1!": "uppercase", "NOLOWERCASE1!": "lowercase",
              "NoSpecialChar123": "special"}
     for pw, words in cases.items():
-        r = client.post("/api/auth/register", json={"name": "X Y", "email": "rules@test.in", "password": pw})
+        r = client.post("/api/auth/register", json={"name": "X Y", "email": "rules@test.example", "password": pw})
         assert r.status_code == 422 and words in r.json()["detail"], (pw, r.text)
 
 
 def test_signup_is_customer_only_and_email_unique(client):
-    _, user = new_customer(client, "unique@test.in")
+    _, user = new_customer(client, "unique@test.example")
     assert user["role"] == "customer"
-    r = client.post("/api/auth/register", json={"name": "Again", "email": "UNIQUE@test.in", "password": "Strong#Pass1"})
+    r = client.post("/api/auth/register", json={"name": "Again", "email": "UNIQUE@test.example", "password": "Strong#Pass1"})
     assert r.status_code == 409
 
 
@@ -66,20 +66,20 @@ def test_customers_only_see_their_own_records(client, admin, customer):
 
 
 def test_password_reset_flow(client):
-    new_customer(client, "forgot@test.in", "Old#Password1")
-    r = client.post("/api/auth/forgot-password", json={"email": "forgot@test.in"}).json()
+    new_customer(client, "forgot@test.example", "Old#Password1")
+    r = client.post("/api/auth/forgot-password", json={"email": "forgot@test.example"}).json()
     token = r["demo_reset_link"].split("token=")[1]
     assert client.post("/api/auth/reset-password", json={"token": token, "password": "weak"}).status_code == 422
     assert client.post("/api/auth/reset-password", json={"token": token, "password": "New#Password1"}).status_code == 200
     assert client.post("/api/auth/reset-password", json={"token": token, "password": "New#Password2"}).status_code == 400
-    login(client, "forgot@test.in", "New#Password1")
+    login(client, "forgot@test.example", "New#Password1")
     # Unknown emails get the same answer and no link
-    r = client.post("/api/auth/forgot-password", json={"email": "nobody@test.in"}).json()
+    r = client.post("/api/auth/forgot-password", json={"email": "nobody@test.example"}).json()
     assert "demo_reset_link" not in r
 
 
 def test_deactivated_user_is_locked_out(client, admin):
-    headers, user = new_customer(client, "leaver@test.in")
+    headers, user = new_customer(client, "leaver@test.example")
     team = {"name": "Temp Staff", "email": "temp@intrinsic.io", "password": "Temp#Pass12", "role": "staff"}
     staff_id = client.post("/api/users", headers=admin, json=team).json()["id"]
     temp = login(client, "temp@intrinsic.io", "Temp#Pass12")
@@ -194,7 +194,7 @@ def _make_active(db, customer_email, plan_name, start, qty=1, expiry=None):
 def test_billing_never_bills_twice_or_skips(client):
     with SessionLocal() as db:
         start = TODAY - timedelta(days=95)
-        sub = _make_active(db, "priya@acmetraders.in", "Starter", start)
+        sub = _make_active(db, "priya@acmetraders.example", "Starter", start)
         first = db.query(Invoice).filter(Invoice.subscription_id == sub.id).count()
         assert first == 1                                                # invoiced on its start date
         run_billing(db, TODAY)
@@ -224,7 +224,7 @@ def test_month_end_dates_do_not_drift():
 
 def test_paused_subscriptions_are_not_billed(client, staff):
     with SessionLocal() as db:
-        sub = _make_active(db, "lakshmi@greenleaf.in", "Starter", TODAY - timedelta(days=40))
+        sub = _make_active(db, "lakshmi@greenleaf.example", "Starter", TODAY - timedelta(days=40))
         sub_id = sub.id
     client.post(f"/api/subscriptions/{sub_id}/pause", headers=staff)
     with SessionLocal() as db:
@@ -236,12 +236,12 @@ def test_paused_subscriptions_are_not_billed(client, staff):
 def test_auto_close_at_expiry_and_renewal(client, staff):
     with SessionLocal() as db:
         start = TODAY - timedelta(days=400)
-        sub = _make_active(db, "david@globexindia.com", "Enterprise Annual", start, expiry=start + timedelta(days=365))
+        sub = _make_active(db, "david@globexindia.example", "Enterprise Annual", start, expiry=start + timedelta(days=365))
         run_billing(db, TODAY)
         db.refresh(sub)
         assert sub.status == "closed"                                    # plan closes it on its own
         assert db.query(Invoice).filter(Invoice.subscription_id == sub.id).count() == 1  # one year billed, not two
-        renewable = _make_active(db, "david@globexindia.com", "Enterprise Annual", TODAY,
+        renewable = _make_active(db, "david@globexindia.example", "Enterprise Annual", TODAY,
                                  expiry=TODAY + timedelta(days=365))
         rid = renewable.id
     r = client.post(f"/api/subscriptions/{rid}/renew", headers=staff).json()
@@ -270,7 +270,7 @@ def test_discount_rules(client, admin, staff):
         "code": "ONCE", "name": "One use", "discount_type": "fixed", "value": 100,
         "start_date": TODAY.isoformat(), "usage_limit": 1}).json()
     with SessionLocal() as db:
-        sub = _make_active(db, "rohan@kaveriprints.in", "Weekly Pilot", TODAY - timedelta(days=15))
+        sub = _make_active(db, "rohan@kaveriprints.example", "Weekly Pilot", TODAY - timedelta(days=15))
         from app.models import Discount
         sub.discount = db.get(Discount, limited["id"])
         db.query(Invoice).filter(Invoice.subscription_id == sub.id).delete()
@@ -310,7 +310,7 @@ def test_pages_respond_under_two_seconds_with_thousands_of_subscriptions(client,
     with SessionLocal() as db:
         plan = db.query(Plan).filter(Plan.name == "Starter").one()
         pw = hash_password("Bulk#Pass1")
-        people = [User(name=f"Bulk {i}", email=f"bulk{i}@load.test", password_hash=pw, role="customer")
+        people = [User(name=f"Bulk {i}", email=f"bulk{i}@load.example", password_hash=pw, role="customer")
                   for i in range(300)]
         db.add_all(people)
         db.flush()
